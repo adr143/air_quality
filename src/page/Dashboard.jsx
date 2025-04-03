@@ -4,42 +4,58 @@ import { useNavigate } from "react-router-dom";
 
 export default function Dashboard({ api_url }) {
   const navigate = useNavigate();
+  const [aqiClass, setAqiClass] = useState("")
+  const [advice, setAdvice] = useState("")
   const [values, setValues] = useState({
-    "Ozone": 0,
-    "Carbon Monoxide": 0,
-    "Carbon Dioxide": 0,
-    "VOC": 0,
-    "PM2.5": 0,
-    "PM10": 0,
-    "Nitrogen Dioxide": 0,
-    "Sulfur Dioxide": 0,
-    "Hydrogen Sulfide": 0
+    "Ozone (ppm)": 0,
+    "Carbon Monoxide (ppm)": 0,
+    "Carbon Dioxide (ppm)": 0,
+    "TVOC (ppb)": 0,
+    "PM2.5 (µg/m³)": 0,
+    "PM10 (µg/m³)": 0,
+    "Nitrogen Dioxide (ppm)": 0,
+    "Sulfur Dioxide (ppm)": 0,
+    "Hydrogen Sulfide (ppm)": 0,
+  });
+
+  const [limits, setLimits] = useState({
+    "Ozone (ppm)": [64, 84, 85, 104, 124, 374, 500],
+    "Carbon Monoxide (ppm)": [50, 100, 199, 299, 400],
+    "Carbon Dioxide (ppm)": [500, 1000, 1500, 1800], 
+    "TVOC (ppb)": [65, 220, 660, 2200, 5500], // Converted to ppb
+    "PM2.5 (µg/m³)": [10, 20, 25, 50, 75, 200],
+    "PM10 (µg/m³)": [20, 40, 50, 100, 150, 250],
+    "Nitrogen Dioxide (ppm)": [40, 90, 120, 230, 340, 500],
+    "Sulfur Dioxide (ppm)": [100, 200, 350, 500, 750, 1250],
+    "Hydrogen Sulfide (ppm)": [10, 50, 300, 700, 1000],
   });
 
   useEffect(() => {
     const fetchParams = () => {
       fetch(`${api_url}/api/sensor-data`)
-      .then((response) => response.json())
-      .then((data) => {
-        const mappedData = {
-          "Ozone": parseFloat(data.find(item => item.id === "O3PPM_container")?.value) || 0,
-          "Carbon Monoxide": parseFloat(data.find(item => item.id === "CO_container")?.value) || 0,
-          "Carbon Dioxide": parseFloat(data.find(item => item.id === "CO2_container")?.value) || 0,
-          "VOC": parseFloat(data.find(item => item.id === "TVOC_container")?.value) || 0,
-          "PM2.5": parseFloat(data.find(item => item.id === "PM2_container")?.value) || 0,
-          "PM10": parseFloat(data.find(item => item.id === "PM10_container")?.value) || 0,
-          "Nitrogen Dioxide": parseFloat(data.find(item => item.id === "NO2PPM_container")?.value) || 0,
-          "Sulfur Dioxide": parseFloat(data.find(item => item.id === "SO2PPM_container")?.value) || 0,
-          "Hydrogen Sulfide": parseFloat(data.find(item => item.id === "H2SPPM_container")?.value) || 0
-        };
-        setValues(mappedData);
-      });
-    }
+        .then((response) => response.json())
+        .then((data) => {
+          const mappedData = {
+            "Ozone (ppm)": parseFloat(data.find(item => item.id === "O3PPM_container")?.value) || 0,
+            "Carbon Monoxide (ppm)": parseFloat(data.find(item => item.id === "CO_container")?.value) || 0,
+            "Carbon Dioxide (ppm)": parseFloat(data.find(item => item.id === "CO2_container")?.value) || 0,
+            "TVOC (ppb)": parseFloat(data.find(item => item.id === "TVOC_container")?.value) || 0,
+            "PM2.5 (µg/m³)": parseFloat(data.find(item => item.id === "PM2_container")?.value) || 0,
+            "PM10 (µg/m³)": parseFloat(data.find(item => item.id === "PM10_container")?.value) || 0,
+            "Nitrogen Dioxide (ppm)": parseFloat(data.find(item => item.id === "NO2PPM_container")?.value) || 0,
+            "Sulfur Dioxide (ppm)": parseFloat(data.find(item => item.id === "SO2PPM_container")?.value) || 0,
+            "Hydrogen Sulfide (ppm)": parseFloat(data.find(item => item.id === "H2SPPM_container")?.value) || 0,
+          };
+
+          setAdvice(data.find(item => item.id === "aqi_container")?.advice)
+          setAqiClass(data.find(item => item.id === "aqi_container")?.evaluation)
+          setValues(mappedData);
+        });
+    };
 
     fetchParams();
     const interval = setInterval(fetchParams, 5000);
     return () => clearInterval(interval);
-
   }, []);
 
   return (
@@ -52,31 +68,44 @@ export default function Dashboard({ api_url }) {
           {/* Left side (2/3 width) */}
           <div className="flex justify-center items-start">
             <div className="grid grid-cols-3 grid-rows-3 p-4">
-              {Object.entries(values).map(([key, val], index) => (
-                <div className="flex flex-col items-center justify-center " key={index}>
+              {Object.entries(values).map(([key, val], index) => {
+                 const maxLimit = limits[key]?.[limits[key].length - 1] || 100; 
+
+                 // Generate subArcs dynamically based on limits
+                 const colorScale = ["#5BE12C", "#F5DD42", "#FFA500", "#FF4500", "#D32F2F", "#800000", "#400000"]; 
+
+                 const subArcs = (limits[key] || []).map((limit, i, arr) => ({
+                   limit,
+                   color: colorScale[i % colorScale.length], // Cycle through colors
+                 }));
+                return (
+                  <div className="flex flex-col items-center justify-center " key={index}>
                   <GaugeComponent
                     value={val}
+                    minValue={0}
+                    maxValue={maxLimit} 
                     type="radial"
                     textColor="transparent"
                     labels={{
                       display: false
                     }}
                     arc={{
-                      colorArray: ['#5BE12C','#EA4228'],
-                      subArcs: [{limit: 10}, {limit: 30}, {}, {}, {}],
-                      padding: 0.00,
-                      width: 0.5,
-                      cornerRadius: 1
-                    }}
+                            colorArray: subArcs.map(sa => sa.color),
+                            subArcs: subArcs,
+                            padding: 0.0,
+                            width: 0.5,
+                            cornerRadius: 1,
+                          }}
                     pointer={{
                       elastic: true,
                       animationDelay: 0
                     }}
                     style={{ maxWidth: "100%", maxHeight: "100%", width: "120px", height: "120px" }} 
                     />
-                    <h2 className="text-sm md:text-md text-center">{key}</h2>
+                    <h2 className="text-xs md:text-sm sm:text-md text-center">{key}</h2>
                 </div>
-              ))}
+                )
+              })}
             </div>
           </div>
           
@@ -104,14 +133,19 @@ export default function Dashboard({ api_url }) {
                 style={{ maxWidth: "100%", maxHeight: "100%", width: "360px" }} 
               />
               <h2>Overall Air Quality</h2>
+              <h2>{aqiClass}</h2><br />
+              <div className="font-bold">{advice}</div>
             </div>
           </div>
         </div>
       </div>
       <div className="fixed bottom-0 w-screen p-8 md:p-16 flex justify-start md:justify-center">
         <div className="">
-          <button onClick={() => navigate("/info")} className="hover:cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-[10rem] text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Learn More</button>
+          <button onClick={() => navigate("/learnmore")} className="hover:cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-[10rem] text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Learn More</button>
         </div>
+      </div>
+      <div>
+
       </div>
     </div>
   );

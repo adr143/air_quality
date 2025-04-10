@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 
 export default function Dashboard({ api_url }) {
   const navigate = useNavigate();
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [aqiClass, setAqiClass] = useState("")
+  const [aqi, setAqi] = useState(0)
   const [advice, setAdvice] = useState("")
   const [values, setValues] = useState({
     "Ozone (ppm)": 0,
@@ -49,6 +51,7 @@ export default function Dashboard({ api_url }) {
 
           setAdvice(data.find(item => item.id === "aqi_container")?.advice)
           setAqiClass(data.find(item => item.id === "aqi_container")?.evaluation)
+          // setAqi(data.find(item => item.id === "aqi_container")?.aqi)
           setValues(mappedData);
         });
     };
@@ -58,10 +61,34 @@ export default function Dashboard({ api_url }) {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const clockInterval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+  
+    return () => clearInterval(clockInterval);
+  }, []);
+
+  const fullDate = new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(currentTime);
+  
+  const shortDate = new Intl.DateTimeFormat('en-US', {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(currentTime);
+
+  const formattedTime = currentTime.toLocaleTimeString();
+
   return (
-    <div className="relative w-screen">
+    <div className="relative w-screen mt-4">
       <div>
-        <h1 className="text-3xl text-center mt-4 cursor-pointer" onClick={() => navigate("/")} >Air Quality Index</h1>
+        <h1 className="text-3xl text-center cursor-pointer" onClick={() => navigate("/")} >Air Quality Index</h1>
       </div>
       <div className="w-screen flex justify-center">
         <div className="grid grid-cols-1 md:grid-cols-2 p-4">
@@ -112,6 +139,12 @@ export default function Dashboard({ api_url }) {
           {/* Right side (1/3 width) with bigger gauge */}
           <div className="flex items-start justify-center p-4">
             <div className="relative flex flex-col justify-center items-center w-full aspect-square">
+              {/* Date time here */}
+              <div className="text-center mb-2">
+                <h3 className="hidden md:block text-sm md:text-md font-semibold">{fullDate}</h3>
+                <h3 className="md:hidden text-sm font-semibold">{shortDate}</h3>
+                <h3 className="text-sm md:text-md">{formattedTime}</h3>
+              </div>
               <GaugeComponent
                 value={50}
                 type="radial"
@@ -133,8 +166,13 @@ export default function Dashboard({ api_url }) {
                 style={{ maxWidth: "100%", maxHeight: "100%", width: "360px" }} 
               />
               <h2>Overall Air Quality</h2>
-              <h2>{aqiClass}</h2><br />
-              <div className="font-bold">{advice}</div>
+              <h2 className="relative group cursor-help">
+                {aqiClass}
+                {/* Tooltip */}
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-max max-w-xs text-sm text-white bg-gray-800 px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 pointer-events-none">
+                  {advice}
+                </div>
+              </h2>
             </div>
           </div>
         </div>

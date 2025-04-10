@@ -5,7 +5,9 @@ import { useNavigate } from "react-router-dom";
 export default function Monitoring({ api_url }) {
   const navigate = useNavigate();
   const [aqiClass, setAqiClass] = useState("")
+  const [aqi, setAqi] = useState(0)
   const [tomAqiClass, setTomAqiClass] = useState("")
+  const [tomAqi, setTomAqi] = useState(0)
   const [values, setValues] = useState({
     "Ozone (ppm)": 0,
     "Carbon Monoxide (ppm)": 0,
@@ -59,6 +61,7 @@ export default function Monitoring({ api_url }) {
           };
 
           setAqiClass(data.find(item => item.id === "aqi_container")?.evaluation)
+          // setAqi(data.find(item => item.id === "aqi_container")?.aqi)
           setValues(mappedData);
         });
     };
@@ -80,6 +83,7 @@ export default function Monitoring({ api_url }) {
           };
 
           setTomAqiClass(data.find(item => item.id === "aqi_container")?.evaluation)
+          // setTomAqi(data.find(item => item.id === "aqi_container")?.aqi)
           setTomValues(mappedData);
         });
     };
@@ -91,16 +95,16 @@ export default function Monitoring({ api_url }) {
   }, []);
 
   return (
-    <div className="relative w-screen my-12">
+    <div className="relative w-screen mb-16 md:mb-0">
       <div>
-        <h1 className="text-3xl text-center mt-4 cursor-pointer" onClick={() => navigate("/")}>Air Quality Index</h1>
+        <h1 className="text-3xl text-center cursor-pointer p-4" onClick={() => navigate("/")}>Air Quality Index</h1>
       </div>
       <div className="w-screen flex justify-center items-center">
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] p-4">
           <div className="flex justify-center">
-            <div className="grid grid-rows-1">
+            <div className="">
               <div className="flex justify-center items-start">
-                <div className="grid grid-cols-3 grid-rows-3 md:grid-cols-5 md:grid-rows-2 p-4 text-center">
+                <div className="grid grid-cols-3 grid-rows-3 md:grid-cols-5 md:grid-rows-2 text-center">
                   {Object.entries(values).map(([key, val], index) => {
                     const maxLimit = limits[key]?.[limits[key].length - 1] || 100; 
 
@@ -129,7 +133,7 @@ export default function Monitoring({ api_url }) {
                             cornerRadius: 1,
                           }}
                           pointer={{ elastic: true, animationDelay: 0 }}
-                          style={{ maxWidth: "100%", maxHeight: "100%", width: "100px", height: "100px" }}
+                          style={{ maxWidth: "100%", maxHeight: "100%", width: "120px", height: "120px" }}
                         />
                         <h2 className="text-[.5rem] md:text-[.75rem] text-center">{key}</h2>
                       </div>
@@ -143,15 +147,15 @@ export default function Monitoring({ api_url }) {
                 <div className="relative grid grid-cols-2 place-center" >
                 <div className="relative flex flex-col justify-center items-center">
                   <GaugeComponent
-                    value={50}
+                    value={aqi}
                     minValue={0}
-                    maxValue={100}
+                    maxValue={500}
                     type="radial"
                     textColor="transparent"
                     labels={{ display: false }}
                     arc={{
                       colorArray: ["#5BE12C", "#EA4228"],
-                      subArcs: [{ limit: 50 }, { limit: 70 }, { limit: 80 }],
+                      subArcs: [{ limit: 100 }, { limit: 150 }, { limit: 250 }, { limit: 350 }],
                       padding: 0.0,
                       width: 0.5,
                       cornerRadius: 1,
@@ -186,15 +190,15 @@ export default function Monitoring({ api_url }) {
               <div className="relative grid grid-cols-2 place-center" >
                   <div className="relative flex flex-col justify-center items-center">
                     <GaugeComponent
-                      value={50}
+                      value={tomAqi}
                       minValue={0}
-                      maxValue={100}
+                      maxValue={500}
                       type="radial"
                       textColor="transparent"
                       labels={{ display: false }}
                       arc={{
                         colorArray: ["#5BE12C", "#EA4228"],
-                        subArcs: [{ limit: 50 }, { limit: 70 }, { limit: 80 }],
+                        subArcs: [{ limit: 100 }, { limit: 150 }, { limit: 250 }, { limit: 350 }],
                         padding: 0.0,
                         width: 0.5,
                         cornerRadius: 1,

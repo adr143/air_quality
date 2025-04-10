@@ -7,12 +7,14 @@ import Navbar from "./components/Navbar";
 import './App.css'
 
 // const api_url = "https://aqmonitoring.pythonanywhere.com"
-const api_url = "https://stale-newt-84.telebit.io"
+// const api_url = "air_quality-airqualit.pitunnel.net"
+// const api_url = "https://stale-newt-84.telebit.io"
+const api_url = "http://192.168.0.101:5000"
 
 function App() {
 
   return (
-    <Router className="bg-[url('/path-to-image.jpg')] bg-cover bg-center h-screen">
+    <Router>
       <div className="fixed z-[-100] top-0 left-0 w-full h-full bg-cover bg-center flex items-center justify-center" style={{ backgroundImage: "url('/bg.png')" }}></div>
       <Navbar />
       <Routes>

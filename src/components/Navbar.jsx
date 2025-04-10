@@ -5,7 +5,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-blue-700 text-white shadow-md">
+    <nav className="sticky top-0 z-50 w-screen bg-blue-700 text-white shadow-md">
       <div className="container mx-auto flex justify-between items-center px-4 py-3">
         
         {/* Logo / Branding */}
@@ -27,7 +27,7 @@ export default function Navbar() {
         </button>
 
         {/* Navigation Links (Desktop) */}
-        <div className="hidden md:flex space-x-6">
+        <div className="hidden md:flex space-x-6 justify-center items-center">
           <Link to="/" className="hover:text-gray-300">Dashboard</Link>
           <Link to="/info" className="hover:text-gray-300">Monitoring</Link>
           <Link to="/learnmore" className="hover:text-gray-300">Learn More</Link>
@@ -41,7 +41,7 @@ export default function Navbar() {
           <Link to="/" className="hover:text-gray-300" onClick={() => setIsOpen(false)}>Dashboard</Link>
           <Link to="/info" className="hover:text-gray-300" onClick={() => setIsOpen(false)}>Monitoring</Link>
           <Link to="/learnmore" className="hover:text-gray-300" onClick={() => setIsOpen(false)}>Learn More</Link>
-          <Link to="/signup" className="bg-white text-blue-700 px-4 py-2 rounded-md hover:bg-gray-100" onClick={() => setIsOpen(false)}>Sign Up</Link>
+          <Link to="/signup" className="bg-white text-center text-blue-700 px-4 py-2 rounded-md hover:bg-gray-100" onClick={() => setIsOpen(false)}>Sign Up</Link>
         </div>
       )}
     </nav>
